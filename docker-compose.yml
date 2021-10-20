@@ -1,0 +1,86 @@
+version: "3.3"
+
+services:
+  mina:
+    image: ${MINA}
+    container_name: mina
+    ports:
+      - "6060:6060"
+      - "8302:8302"
+      - "127.0.0.1:3085:3085"
+    restart: always
+    env_file:
+      - $HOME/mina-archive-mainnet/.env
+    environment: 
+      - CODA_PRIVKEY_PASS: ${CODA_PRIVKEY_PASS}
+      - UPTIME_PRIVKEY_PASS: ${UPTIME_PRIVKEY_PASS}
+      - KEYPATH: ${KEYPATH}
+      - COINBASE_RECEIVER: ${COINBASE_RECEIVER}
+      - GCLOUD_KEYFILE: ${GCLOUD_KEYFILE}
+      - NETWORK_NAME: ${NETWORK_NAME}
+      - GCLOUD_BLOCK_UPLOAD_BUCKET: ${GCLOUD_BLOCK_UPLOAD_BUCKET}
+    volumes:
+      - "$HOME/mina-archive-mainnet/.mina-config:$HOME/.mina-config"
+      - "$HOME/mina-archive-mainnet/keys:/root/keys:ro"
+      - "${GCLOUD_KEYFILE}:${GCLOUD_KEYFILE}"
+    command: >
+      daemon
+        --peer-list-url ${PEER_LIST}
+        --block-producer-key ${KEYPATH}
+        --coinbase-receiver ${COINBASE_RECEIVER}
+        --uptime-submitter-key ${KEYPATH}
+        --uptime-url http://34.134.227.208/v1/submit
+        --metrics-port 6060
+        --archive-address archive:3086
+        --log-precomputed-blocks true
+        --insecure-rest-server
+        --file-log-level Debug
+        --log-level Info
+        --upload-blocks-to-gcloud true
+    networks:
+      - archive
+      - mina 
+
+  postgres:
+    image: ${POSTGRES}
+    container_name: postgres
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - ./pgdata/data:/var/lib/postgresql/data/:rw
+      - ./pginit/init-mina-db.sh:/docker-entrypoint-initdb.d/init-mina-db.sh
+    env_file:
+      - $HOME/mina-archive-mainnet/.env
+    environment:
+      POSTGRES_USER: ${PGUSER}
+      POSTGRES_PASSWORD: ${PGPASSWORD}
+      POSTGRES_DB: ${PGDATABASE}
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    networks:
+      - archive
+
+  archive:
+    image: ${ARCHIVE}
+    container_name: archive
+    depends_on:
+      - postgres
+    pid: host
+    restart: always
+    env_file:
+      - $HOME/mina-archive-mainnet/.env
+    environment: 
+      - PGUSER: ${PGUSER}
+      - PGPASSWORD: ${PGPASSWORD}
+    command: coda-archive run --postgres-uri ${PGURI} --server-port 3086 --log-level debug
+    networks:
+      - archive
+      - mina
+
+volumes:
+  postgres:
+          
+networks:
+  archive:
+    driver: bridge
+  mina:
+    driver: bridge
