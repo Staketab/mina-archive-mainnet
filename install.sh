@@ -21,12 +21,12 @@ read -p "Mina docker image: " MINATAG
 echo "-------------------------------------------------------------------"
 echo -e "$YELLOW Enter CODA_PRIVKEY_PASS (Block Producer private key pass) $NORMAL"
 echo "-------------------------------------------------------------------"
-read -s "CODA_PRIVKEY_PASS: " CODA_PRIVKEY_PASS
+read -s CODA_PRIVKEY_PASS
 
 echo "-------------------------------------------------------------------"
 echo -e "$YELLOW Enter UPTIME_PRIVKEY_PASS $NORMAL"
 echo "-------------------------------------------------------------------"
-read -s "UPTIME_PRIVKEY_PASS: " UPTIME_PRIVKEY_PASS
+read -s UPTIME_PRIVKEY_PASS
 
 echo "-------------------------------------------------------------------"
 echo -e "$YELLOW Enter KEYPATH (Example: /home/username/keys/my-wallet or /root/keys/my-wallet )$NORMAL"
@@ -47,33 +47,41 @@ read -p "Archive docker image: " ARCHIVETAG
 echo "-------------------------------------------------------------------"
 echo -e "$YELLOW Enter PGPASSWORD (Postgres user password) $NORMAL"
 echo "-------------------------------------------------------------------"
-read -s "PGPASSWORD: " PGPASSWORD
+read -s PGPASSWORD
 }
 
 function confGCP {
-echo -e "$YELLOW Enter Archive docker image. $NORMAL"
+echo -e "$YELLOW Enter GCLOUD_KEYFILE. $NORMAL"
 echo "-------------------------------------------------------------------"
-read -p "Archive docker image: " ARCHIVETAG
+read -p "GCLOUD KEYFILE: " GCLOUD_KEYFILE
 
 echo "-------------------------------------------------------------------"
-echo -e "$YELLOW Enter PGPASSWORD (Postgres user password) $NORMAL"
+echo -e "$YELLOW Enter GCLOUD_BLOCK_UPLOAD_BUCKET $NORMAL"
 echo "-------------------------------------------------------------------"
-read -s "PGPASSWORD: " PGPASSWORD
+read -p "GCLOUD BLOCK UPLOAD BUCKET: " GCLOUD_BLOCK_UPLOAD_BUCKET
+}
+
+function confSidecar {
+echo -e "$YELLOW Enter Sidecar docker image. $NORMAL"
+echo "-------------------------------------------------------------------"
+read -p "Sidecar docker image: " SIDECARTAG
 }
 
 function install {
 sudo iptables -A INPUT -p tcp --dport 8302:8302 -j ACCEPT
-sudo chmod 700 $HOME/mina-archive-mainnet/keys
-sudo chmod 600 $HOME/mina-archive-mainnet/keys/my-wallet
 
 sudo /bin/bash -c  'echo "# Fields to start Mina daemon (Required)
 MINA='${MINATAG}'
 PEER_LIST=https://storage.googleapis.com/mina-seed-lists/mainnet_seeds.txt
 CODA_PRIVKEY_PASS='${CODA_PRIVKEY_PASS}'
 UPTIME_PRIVKEY_PASS='${UPTIME_PRIVKEY_PASS}'
-# PATH to your Mina private key file.
+#PATH to your Mina private key file.
 KEYPATH='${KEYPATH}'
+UPTIME_KEYPATH='${KEYPATH}'
 COINBASE_RECEIVER='${COINBASE_RECEIVER}'
+
+# Next fields for SIDECAR (Optional)
+SIDECAR='${SIDECARTAG}'
 
 # Next fields for Archive DB (Optional)
 ARCHIVE='${ARCHIVETAG}'
@@ -84,7 +92,7 @@ PGDATABASE=archive
 PGURI=postgres://postgres:5432/archive
 
 # Next fields for upload blocks to GCP (Optional)
-# Example: /root/name-54f58bcv6s7.json (keyfile from your GCP)
+# Example: name-54f58bcv6s7.json (keyfile from your GCP)
 GCLOUD_KEYFILE='${GCLOUD_KEYFILE}'
 # Example: devnet or mainnet
 NETWORK_NAME=mainnet
@@ -103,6 +111,7 @@ cd
 
 update
 confMinaNode
+confSidecar
 confMinaArchive
 confGCP
 install
