@@ -12,6 +12,7 @@ services:
     env_file:
       - $HOME/mina-archive-mainnet/.env
     environment: 
+      MINA_PRIVKEY_PASS: ${MINA_PRIVKEY_PASS}
       CODA_PRIVKEY_PASS: ${CODA_PRIVKEY_PASS}
       UPTIME_PRIVKEY_PASS: ${UPTIME_PRIVKEY_PASS}
       KEYPATH: ${KEYPATH}
