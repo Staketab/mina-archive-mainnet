@@ -14,7 +14,7 @@ echo "-------------------------------------------------------------------"
 }
 
 function confMinaNode {
-echo -e "$YELLOW Enter Mina docker image. $NORMAL"
+echo -e "$YELLOW Enter Mina docker image. (Example: minaprotocol/mina-daemon:1.2.2-feee67c-mainnet) $NORMAL"
 echo "-------------------------------------------------------------------"
 read -p "Mina docker image: " MINATAG
 
@@ -40,7 +40,7 @@ read -p "COINBASE_RECEIVER: " COINBASE_RECEIVER
 }
 
 function confMinaArchive {
-echo -e "$YELLOW Enter Archive docker image. $NORMAL"
+echo -e "$YELLOW Enter Archive docker image. (Example: minaprotocol/mina-archive:1.2.2-feee67c) $NORMAL"
 echo "-------------------------------------------------------------------"
 read -p "Archive docker image: " ARCHIVETAG
 
