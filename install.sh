@@ -37,11 +37,6 @@ echo "-------------------------------------------------------------------"
 echo -e "$YELLOW Enter COINBASE_RECEIVER to transfer BP rewards on it. $NORMAL"
 echo "-------------------------------------------------------------------"
 read -p "COINBASE_RECEIVER: " COINBASE_RECEIVER
-
-echo "-------------------------------------------------------------------"
-echo -e "$YELLOW Enter COINBASE_RECEIVER to transfer BP rewards on it. $NORMAL"
-echo "-------------------------------------------------------------------"
-read -p "COINBASE_RECEIVER: " COINBASE_RECEIVER
 }
 
 function confMinaArchive {
