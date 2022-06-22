@@ -19,9 +19,9 @@ echo "-------------------------------------------------------------------"
 read -p "Mina docker image: " MINATAG
 
 echo "-------------------------------------------------------------------"
-echo -e "$YELLOW Enter CODA_PRIVKEY_PASS (Block Producer private key pass) $NORMAL"
+echo -e "$YELLOW Enter MINA_PRIVKEY_PASS (Block Producer private key pass) $NORMAL"
 echo "-------------------------------------------------------------------"
-read -s CODA_PRIVKEY_PASS
+read -s MINA_PRIVKEY_PASS
 
 echo "-------------------------------------------------------------------"
 echo -e "$YELLOW Enter UPTIME_PRIVKEY_PASS $NORMAL"
@@ -34,7 +34,12 @@ echo "-------------------------------------------------------------------"
 read -p "KEYPATH: " KEYPATH
 
 echo "-------------------------------------------------------------------"
-echo -e "$YELLOW Enter COINBASE_RECEIVER $NORMAL"
+echo -e "$YELLOW Enter COINBASE_RECEIVER to transfer BP rewards on it. $NORMAL"
+echo "-------------------------------------------------------------------"
+read -p "COINBASE_RECEIVER: " COINBASE_RECEIVER
+
+echo "-------------------------------------------------------------------"
+echo -e "$YELLOW Enter COINBASE_RECEIVER to transfer BP rewards on it. $NORMAL"
 echo "-------------------------------------------------------------------"
 read -p "COINBASE_RECEIVER: " COINBASE_RECEIVER
 }
@@ -62,9 +67,9 @@ read -p "GCLOUD BLOCK UPLOAD BUCKET: " GCLOUD_BLOCK_UPLOAD_BUCKET
 }
 
 function confSidecar {
-echo -e "$YELLOW Enter Sidecar docker image. $NORMAL"
+echo -e "$YELLOW Used Sidecar docker image: minaprotocol/mina-bp-stats-sidecar:1.1.6-386c5ac $NORMAL"
 echo "-------------------------------------------------------------------"
-read -p "Sidecar docker image: " SIDECARTAG
+SIDECARTAG="minaprotocol/mina-bp-stats-sidecar:1.1.6-386c5ac"
 }
 
 function install {
@@ -73,12 +78,18 @@ sudo iptables -A INPUT -p tcp --dport 8302:8302 -j ACCEPT
 sudo /bin/bash -c  'echo "# Fields to start Mina daemon (Required)
 MINA='${MINATAG}'
 PEER_LIST=https://storage.googleapis.com/mina-seed-lists/mainnet_seeds.txt
-CODA_PRIVKEY_PASS='${CODA_PRIVKEY_PASS}'
+MINA_PRIVKEY_PASS='${MINA_PRIVKEY_PASS}'
+CODA_PRIVKEY_PASS='${MINA_PRIVKEY_PASS}'
 UPTIME_PRIVKEY_PASS='${UPTIME_PRIVKEY_PASS}'
+
 #PATH to your Mina private key file.
 KEYPATH='${KEYPATH}'
 UPTIME_KEYPATH='${KEYPATH}'
 COINBASE_RECEIVER='${COINBASE_RECEIVER}'
+NODE_STATUS_URL="--node-status-url https://us-central1-o1labs-192920.cloudfunctions.net/node-status-collection"
+NODE_ERROR_URL="--node-error-url https://us-central1-o1labs-192920.cloudfunctions.net/node-error-collection"
+UPTIME_URL="https://uptime-backend.minaprotocol.com/v1/submit"
+STOP_TIME="--stop-time '${TIME:-"200"}'"
 
 # Next fields for SIDECAR (Optional)
 SIDECAR='${SIDECARTAG}'
@@ -92,7 +103,7 @@ PGDATABASE=archive
 PGURI=postgres://postgres:5432/archive
 
 # Next fields for upload blocks to GCP (Optional)
-# Example: name-54f58bcv6s7.json (keyfile from your GCP)
+# Example: name-54f58bcv6s7.json (keyfile from your GCP, must be stored in $HOME/mina-archive-mainnet/)
 GCLOUD_KEYFILE='${GCLOUD_KEYFILE}'
 # Example: devnet or mainnet
 NETWORK_NAME=mainnet
@@ -111,7 +122,7 @@ cd
 
 update
 confMinaNode
-confSidecar
 confMinaArchive
+confSidecar
 confGCP
 install

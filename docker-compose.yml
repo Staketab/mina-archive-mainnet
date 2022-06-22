@@ -31,7 +31,9 @@ services:
         --block-producer-key ${KEYPATH}
         --coinbase-receiver ${COINBASE_RECEIVER}
         --uptime-submitter-key ${KEYPATH}
-        --uptime-url http://34.134.227.208/v1/submit
+        --uptime-url ${UPTIME_URL}
+        ${NODE_STATUS_URL}
+        ${NODE_ERROR_URL}
         --metrics-port 6060
         --archive-address archive:3086
         --open-limited-graphql-port
@@ -41,6 +43,7 @@ services:
         --file-log-level Debug
         --log-level Info
         --upload-blocks-to-gcloud true
+        ${STOP_TIME}
     networks:
       - archive
       - mina 
@@ -75,7 +78,7 @@ services:
     environment: 
       PGUSER: ${PGUSER}
       PGPASSWORD: ${PGPASSWORD}
-    command: coda-archive run --postgres-uri ${PGURI} --server-port 3086 --log-level debug
+    command: mina-archive run --postgres-uri ${PGURI} --server-port 3086 --log-level debug
     networks:
       - archive
       - mina
