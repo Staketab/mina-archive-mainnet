@@ -12,32 +12,18 @@ services:
     env_file:
       - $HOME/mina-archive-mainnet/.env
     environment: 
-      MINA_PRIVKEY_PASS: ${MINA_PRIVKEY_PASS}
-      CODA_PRIVKEY_PASS: ${CODA_PRIVKEY_PASS}
-      UPTIME_PRIVKEY_PASS: ${UPTIME_PRIVKEY_PASS}
-      KEYPATH: ${KEYPATH}
-      COINBASE_RECEIVER: ${COINBASE_RECEIVER}
       GCLOUD_KEYFILE: ${GCLOUD_KEYFILE}
       NETWORK_NAME: ${NETWORK_NAME}
       GCLOUD_BLOCK_UPLOAD_BUCKET: ${GCLOUD_BLOCK_UPLOAD_BUCKET}
     volumes:
       - "$HOME/.mina-config:/root/.mina-config"
-      - "$HOME/keys:/root/keys:ro"
       - "$HOME/mina-archive-mainnet/${GCLOUD_KEYFILE}:/root/${GCLOUD_KEYFILE}"
       - "./import.sh:/entrypoint.d/import.sh"
     command: >
       daemon
         --peer-list-url ${PEER_LIST}
-        --block-producer-key ${KEYPATH}
-        --coinbase-receiver ${COINBASE_RECEIVER}
-        --uptime-submitter-key ${KEYPATH}
-        --uptime-url ${UPTIME_URL}
-        ${NODE_STATUS_URL}
-        ${NODE_ERROR_URL}
         --metrics-port 6060
         --archive-address archive:3086
-        --open-limited-graphql-port
-        --limited-graphql-port 3095
         --log-precomputed-blocks true
         --insecure-rest-server
         --file-log-level Debug
@@ -81,20 +67,6 @@ services:
     command: mina-archive run --postgres-uri ${PGURI} --server-port 3086 --log-level debug
     networks:
       - archive
-      - mina
-
-  sidecar:
-    image: ${SIDECAR}
-    container_name: sidecar
-    depends_on:
-      - mina
-    pid: host
-    restart: always
-    env_file:
-      - $HOME/mina-archive-mainnet/.env
-    volumes:
-      - "$HOME/mina-archive-mainnet/sidecar.json:/etc/mina-sidecar.json"
-    networks:
       - mina
 
 volumes:
