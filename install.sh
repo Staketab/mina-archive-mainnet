@@ -41,12 +41,6 @@ echo "-------------------------------------------------------------------"
 read -p "GCLOUD BLOCK UPLOAD BUCKET: " GCLOUD_BLOCK_UPLOAD_BUCKET
 }
 
-function confSidecar {
-echo -e "$YELLOW Used Sidecar docker image: minaprotocol/mina-bp-stats-sidecar:1.1.6-386c5ac $NORMAL"
-echo "-------------------------------------------------------------------"
-SIDECARTAG="minaprotocol/mina-bp-stats-sidecar:1.1.6-386c5ac"
-}
-
 function install {
 sudo iptables -A INPUT -p tcp --dport 8302:8302 -j ACCEPT
 
@@ -89,6 +83,5 @@ cd
 update
 confMinaNode
 confMinaArchive
-confSidecar
 confGCP
 install
